@@ -1,0 +1,41 @@
+basePath: /
+definitions:
+  message.message:
+    properties:
+      message:
+        type: string
+    type: object
+  responses.ErrResponse:
+    properties:
+      error:
+        type: string
+    type: object
+host: localhost:5000
+info:
+  contact: {}
+  description: Server to create messages in postgres and kafka
+  title: Messagio Test Task API
+  version: "1.0"
+paths:
+  /messages/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Сообщение
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/message.message'
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrResponse'
+      summary: Создает новое сообщение
+      tags:
+      - message
+swagger: "2.0"
