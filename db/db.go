@@ -43,7 +43,7 @@ func NewDatabase() (*Database, error) {
 }
 
 func (db *Database) Close() {
-	db.Close()
+	db.db.Close()
 }
 
 func (d *Database) GetDB() *sql.DB {

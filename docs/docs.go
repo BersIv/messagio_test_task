@@ -31,7 +31,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/message.message"
+                            "$ref": "#/definitions/message.messageReq"
                         }
                     }
                 ],
@@ -42,7 +42,38 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrResponse"
+                            "$ref": "#/definitions/responses.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/messages/stats": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "message"
+                ],
+                "summary": "Выводит информацию о количестве необработанных сообщений",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.Response"
                         }
                     }
                 }
@@ -50,7 +81,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "message.message": {
+        "message.messageReq": {
             "type": "object",
             "properties": {
                 "message": {
@@ -58,10 +89,10 @@ const docTemplate = `{
                 }
             }
         },
-        "responses.ErrResponse": {
+        "responses.Response": {
             "type": "object",
             "properties": {
-                "error": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -72,7 +103,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:5000",
+	Host:             "194.247.187.44:5000",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Messagio Test Task API",

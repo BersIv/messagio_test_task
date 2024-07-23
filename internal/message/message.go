@@ -1,19 +1,24 @@
 package message
 
-import "context"
+import (
+	"context"
+	"messagio_test_task/internal/models"
+)
 
-type message struct {
+type messageReq struct {
 	Message string `json:"message"`
 }
 
-type idRes struct {
-	Id uint `json:"id"`
-}
-
 type MessageRepository interface {
-	createMessage(ctx context.Context, message *message) (*idRes, error)
+	createMessage(ctx context.Context, message *models.Message) error
+	updateMessage(ctx context.Context, message *models.Message) error
+	getPendingMessagesCount(ctx context.Context) (*uint, error)
+	getProcessedMessagesCount(ctx context.Context) (*uint, error)
 }
 
 type MessageService interface {
-	createMessage(ctx context.Context, message *message) (*idRes, error)
+	createMessage(ctx context.Context, message *models.Message) error
+	UpdateMessage(ctx context.Context, message *models.Message) error
+	getPendingMessagesCount(ctx context.Context) (*uint, error)
+	getProcessedMessagesCount(ctx context.Context) (*uint, error)
 }

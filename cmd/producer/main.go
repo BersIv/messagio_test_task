@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"messagio_test_task/db"
 	"messagio_test_task/internal/message"
+	"messagio_test_task/internal/producer"
 	"messagio_test_task/router"
 	"os"
 
@@ -14,7 +15,7 @@ import (
 // @title Messagio Test Task API
 // @version 1.0
 // @description Server to create messages in postgres and kafka
-// @host localhost:5000
+// @host 194.247.187.44:5000
 // @BasePath /
 func main() {
 	file, err := os.Create("logs.log")
@@ -39,7 +40,16 @@ func main() {
 	}
 	defer dbConn.Close()
 
-	messageHandler := message.NewMessageHandler(message.NewMessageService(message.NewMessageRepository(dbConn.GetDB())))
+	kafkaProducer, err := producer.NewProducer()
+	if err != nil {
+		log.Fatalf("Could not create kafka produced: %s", err)
+	}
+	defer func() {
+		if err := kafkaProducer.Close(); err != nil {
+			log.Fatalf("Failed to close Kafka producer: %s", err)
+		}
+	}()
+	messageHandler := message.NewMessageHandler(message.NewMessageService(message.NewMessageRepository(dbConn.GetDB())), kafkaProducer)
 
 	r := router.InitRouter(
 		router.MessageRouter(messageHandler),
@@ -47,7 +57,7 @@ func main() {
 
 	slog.Info("Server started")
 
-	if err := router.Start("localhost:5000", r); err != nil {
+	if err := router.Start("0.0.0.0:5000", r); err != nil {
 		log.Fatalf("Failed to start server: %s", err)
 	}
 }
