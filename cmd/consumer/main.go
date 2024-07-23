@@ -12,27 +12,27 @@ import (
 )
 
 func main() {
-	file, err := os.Create("logs.log")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	err = godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env", "error", err)
 	}
-
-	logger := slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
-		AddSource: true,
-	}))
-	slog.SetDefault(logger)
 
 	dbConn, err := db.NewDatabase()
 	if err != nil {
 		log.Fatalf("Could not initialize database connection: %s", err)
 	}
 	defer dbConn.Close()
+
+	file, err := os.Create("logs.log")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	logger := slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
+		AddSource: true,
+	}))
+	slog.SetDefault(logger)
 
 	consumer.StartConsumerGroup(message.NewMessageService(message.NewMessageRepository(dbConn.GetDB())))
 }

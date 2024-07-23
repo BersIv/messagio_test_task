@@ -18,21 +18,10 @@ import (
 // @host 194.247.187.44:5000
 // @BasePath /
 func main() {
-	file, err := os.Create("logs.log")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	err = godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env", "error", err)
 	}
-
-	logger := slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
-		AddSource: true,
-	}))
-	slog.SetDefault(logger)
 
 	dbConn, err := db.NewDatabase()
 	if err != nil {
@@ -55,7 +44,18 @@ func main() {
 		router.MessageRouter(messageHandler),
 	)
 
-	slog.Info("Server started")
+	file, err := os.Create("logs.log")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	log.Printf("Server started")
+
+	logger := slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
+		AddSource: true,
+	}))
+	slog.SetDefault(logger)
 
 	if err := router.Start("0.0.0.0:5000", r); err != nil {
 		log.Fatalf("Failed to start server: %s", err)

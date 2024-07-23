@@ -3,10 +3,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
+	"log"
 	"os"
-	"path/filepath"
-	"runtime"
 
 	_ "github.com/lib/pq"
 )
@@ -33,11 +31,7 @@ func NewDatabase() (*Database, error) {
 		return nil, err
 	}
 
-	if err := inicializeDatabase(db); err != nil {
-		return nil, err
-	}
-
-	slog.Info("Database inicialized")
+	log.Println("Database inicialized")
 
 	return &Database{db: db}, nil
 }
@@ -48,25 +42,4 @@ func (db *Database) Close() {
 
 func (d *Database) GetDB() *sql.DB {
 	return d.db
-}
-
-func inicializeDatabase(db *sql.DB) error {
-	_, currentFile, _, _ := runtime.Caller(0)
-	migrationsDir := filepath.Join(filepath.Dir(currentFile), "migrations")
-
-	upFile := filepath.Join(migrationsDir, "up.sql")
-	sqlBytes, err := os.ReadFile(upFile)
-	if err != nil {
-		slog.Error("Error to read up file", "error", err)
-		return fmt.Errorf("failed to read up file: %w", err)
-	}
-
-	_, err = db.Exec(string(sqlBytes))
-	if err != nil {
-		slog.Error("Failed to execute up", "error", err)
-		return fmt.Errorf("failed to execute up: %w", err)
-	}
-
-	slog.Info("Database up successfully")
-	return nil
 }
