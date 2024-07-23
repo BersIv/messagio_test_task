@@ -32,5 +32,6 @@ func Start(addr string, r *mux.Router) error {
 func MessageRouter(messageHandler *message.MessageHandler) Option {
 	return func(r *mux.Router) {
 		r.HandleFunc("/messages/create", messageHandler.CreateMessage).Methods("POST")
+		r.HandleFunc("/messages/stats", messageHandler.GetStatistics).Methods("GET")
 	}
 }

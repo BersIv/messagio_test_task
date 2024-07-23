@@ -1,0 +1,72 @@
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENER_NAME_SEPARATOR: ","
+      KAFKA_LISTENER_NAME: INSIDE
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+    depends_on:
+      - zookeeper
+
+  db:
+    container_name: postgres_container
+    restart: always
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: postgres
+    volumes:
+      - ./db/migrations/up.sql:/docker-entrypoint-initdb.d/up.sql:ro
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  producer:
+    container_name: producer
+    build:
+      context: .
+      target: image-producer
+    command: ./producer
+    environment:
+      - DB_HOST=db
+      - KAFKA_BROKERS=kafka:9093
+    ports:
+      - 5000:5000
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./cmd/producer/.env
+
+  consumer:
+    container_name: consumer
+    build:
+      context: .
+      target: image-consumer
+    command: ./consumer
+    environment:
+      - DB_HOST=db
+      - KAFKA_BROKERS=kafka:9093
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./cmd/consumer/.env

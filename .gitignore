@@ -1,0 +1,3 @@
+cmd/producer/logs.log
+cmd/consumer/logs.log
+.vscode/launch.json

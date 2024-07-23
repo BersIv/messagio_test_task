@@ -5,10 +5,11 @@ BEGIN
     END IF;
 END $$;
 
-DROP TABLE messages;
-
 CREATE TABLE IF NOT EXISTS messages(
     id SERIAL PRIMARY KEY,
     message TEXT NOT NULL,
     status message_statuses DEFAULT 'pending'
 );
+
+CREATE INDEX IF NOT EXISTS idx_messages_id ON messages(id);
+CREATE INDEX IF NOT EXISTS idx_messages_status ON messages(status);

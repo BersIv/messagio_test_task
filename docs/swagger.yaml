@@ -1,16 +1,16 @@
 basePath: /
 definitions:
-  message.message:
+  message.messageReq:
     properties:
       message:
         type: string
     type: object
-  responses.ErrResponse:
+  responses.Response:
     properties:
-      error:
+      message:
         type: string
     type: object
-host: localhost:5000
+host: 194.247.187.44:5000
 info:
   contact: {}
   description: Server to create messages in postgres and kafka
@@ -27,15 +27,35 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/message.message'
+          $ref: '#/definitions/message.messageReq'
       responses:
         "201":
           description: Created
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/responses.ErrResponse'
+            $ref: '#/definitions/responses.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Response'
       summary: Создает новое сообщение
+      tags:
+      - message
+  /messages/stats:
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: Выводит информацию о количестве необработанных сообщений
       tags:
       - message
 swagger: "2.0"
